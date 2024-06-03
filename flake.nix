@@ -35,6 +35,24 @@
               cp word_count $out/bin
             '';
           };
+
+          word-count-benchmark = pkgs.stdenv.mkDerivation {
+            name = "word-count-benchmark";
+            propagatedBuildInputs = [
+              benchkit-python
+            ];
+            buildInputs = [
+              pkgs.makeWrapper
+            ];
+            dontUnpack = true;
+            installPhase = ''
+              install -Dm755 ${./benchmark.py} $out/bin/word-count-benchmark
+              wrapProgram $out/bin/word-count-benchmark \
+                --set SRC_DIR ${self}
+            '';
+          };
+
+          default = word-count-benchmark;
         };
       });
 }
