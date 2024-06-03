@@ -105,17 +105,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (output_filename) {
-    output_file.open(output_filename);
-    if (output_file.is_open()) {
-      output = &output_file;
-    } else {
-      std::cerr << "Failed to open output file: " << output_filename << std::endl;
-      return 1;
-    }
-    
-  }
-
   auto count_start_time_mono = steady_clock::now();
   auto count_start_time_wall = system_clock::now();
 
@@ -131,12 +120,24 @@ int main(int argc, char *argv[]) {
   std::cerr << "count time (wall): " << count_duration_wall.count() << "ms"
             << std::endl;
 
+  if (output_filename) {
+    output_file.open(output_filename);
+    if (output_file.is_open()) {
+      output = &output_file;
+    } else {
+      std::cerr << "Failed to open output file: " << output_filename << std::endl;
+      return 1;
+    }
+    
+  }
+
   auto print_start_time_mono = steady_clock::now();
   auto print_start_time_wall = system_clock::now();
 
   for (std::pair<int, std::string> counted_word : counted_words) {
-    *output << counted_word.first << "\t" << counted_word.second << std::endl;
+    *output << counted_word.first << "\t" << counted_word.second << "\n";
   }
+  output->flush();
 
   auto print_duration_mono =
       duration_cast<milliseconds>(steady_clock::now() - print_start_time_mono);
