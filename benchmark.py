@@ -103,7 +103,6 @@ class WordCountBench(Benchmark):
         lines = command_output.splitlines()
 
         print(lines)
-
         import re
 
         METRIC_REGEX = re.compile("(.+): (\d+)ms")
@@ -122,7 +121,7 @@ def word_count_campaign(
     pre_run_hooks: Iterable[PreRunHook] = (),
     post_run_hooks: Iterable[PostRunHook] = (),
     platform: Platform | None = None,
-    nb_runs: int = 3,
+    nb_runs: int = 1,
     benchmark_duration_seconds: int = 5,
 
     input_file: Iterable[PathType] = (),
@@ -174,11 +173,29 @@ def word_count_campaign(
 
 def main() -> None:
     src_dir = os.environ.get("SRC_DIR", None)
-    campaign = word_count_campaign(src_dir=src_dir)
+    campaign = word_count_campaign(
+        src_dir=src_dir,
+        nb_runs=1,
+    )
     campaigns = [campaign]
     suite = CampaignSuite(campaigns=campaigns)
     suite.print_durations()
     suite.run_suite()
+
+    def rename_input_file(dataframe):
+        dataframe['input_filename'] = dataframe['input_file'].map(os.path.basename)
+        return dataframe
+
+    suite.generate_graph(
+        process_dataframe=rename_input_file,
+        plot_name="barplot",
+        hue="nix_attr",
+        x="input_filename",
+        xlabel="Input file",
+        y="total time (wall)",
+        ylabel="Total wall time (ms)",
+        errorbar="sd",
+    )
 
 if __name__ == '__main__':
     main()
