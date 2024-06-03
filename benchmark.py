@@ -2,6 +2,7 @@
 
 import pathlib
 import os
+import sys
 from typing import Any, Dict, Iterable, List, Optional
 
 from benchkit.benchmark import Benchmark, CommandAttachment, PostRunHook, PreRunHook
@@ -140,7 +141,7 @@ def word_count_campaign(
         src_dir = pathlib.Path(__file__).parent.resolve()
 
     variables = {
-        "input_file": input_file or (str(src_dir / "random.txt"),),
+        "input_file": input_file or (str(src_dir / "bible.txt"),),
         "nix_attr": nix_attr,
     }
 
@@ -173,9 +174,15 @@ def word_count_campaign(
 
 def main() -> None:
     src_dir = os.environ.get("SRC_DIR", None)
+    input_files = None
+    if len(sys.argv) > 1:
+        sys.argv.pop(0)
+        input_files = sys.argv
+
     campaign = word_count_campaign(
         src_dir=src_dir,
-        nb_runs=1,
+        input_file=input_files,
+        nb_runs=5,
     )
     campaigns = [campaign]
     suite = CampaignSuite(campaigns=campaigns)
